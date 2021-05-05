@@ -3,7 +3,7 @@ import Path from 'path';
 import sharp from 'sharp';
 import { promises as fs } from 'fs';
 
-const images = express.Router();
+const image = express.Router();
 const inputDir = 'images';
 const outputDir = 'thumbs';
 
@@ -22,7 +22,7 @@ async function isFilenameOnServer(filename: string) {
     }
 }
 
-images.get('/', async (req, res) => {
+image.get('/', async (req, res) => {
     const filename = req.query.filename as string;
     const width = req.query.width as string;
     const height = req.query.height as string;
@@ -105,4 +105,4 @@ images.get('/', async (req, res) => {
     }
 });
 
-export default images;
+export default image;
