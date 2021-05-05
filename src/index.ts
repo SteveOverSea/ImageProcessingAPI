@@ -1,10 +1,11 @@
-import express from "express";
-const app = express();
+import express from 'express';
+import routes from './routes/index';
+import image from './routes/api/image';
 
+const app = express();
 const port = 3000;
 
-app.listen(port, () => console.log(`Listening on ${port}`));
+app.use('/api', routes);
+app.use('/api/image', image);
 
-export function add(a: number, b:number): number {
-    return a + b;
-}
+app.listen(port, () => console.log(`Listening on ${port}`));

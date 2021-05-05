@@ -6,8 +6,10 @@
   "scripts": {
     "test": "npm run build && jasmine",
     "start-src": "nodemon ./src/index.ts",
-    "start-build": "nodemon ./build/index.js",
-    "build": "npx tsc"
+    "start-build": "npm run build && nodemon ./build/index.js",
+    "build": "npx tsc",
+    "prettier": "prettier --config .prettierrc.json './src/**/*.ts' --write",
+    "lint": "eslint . --ext .ts"
   },
   "keywords": [],
   "author": "",
@@ -16,13 +18,19 @@
     "@types/express": "^4.17.11",
     "@types/jasmine": "^3.6.11",
     "@types/node": "^15.0.2",
+    "@types/sharp": "^0.28.0",
+    "eslint": "^7.25.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "jasmine": "^3.7.0",
     "jasmine-spec-reporter": "^7.0.0",
     "nodemon": "^2.0.7",
+    "prettier": "^2.2.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "sharp": "^0.28.1"
   }
 }
