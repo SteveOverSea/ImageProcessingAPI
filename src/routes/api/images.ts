@@ -1,17 +1,28 @@
 import express from 'express';
 import Path from 'path';
 import sharp from 'sharp';
-import { promises as fs} from "fs";
+import { promises as fs } from 'fs';
 
-const image = express.Router();
-const inputDir = "images";
-const outputDir = "thumbs";
+const images = express.Router();
+const inputDir = 'images';
+const outputDir = 'thumbs';
 
-// TODO: add image size to name and check
 // template for images name: [filename][width]x[height].jpg
 
-image.get('/', async (req, res) => {
+async function isFilenameOnServer(filename: string) {
+    const files = await fs.readdir(inputDir);
+    const fileNames = files.map((file) => file.split('.')[0]);
 
+    const found = fileNames.find((name) => name == filename);
+
+    if (found) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+images.get('/', async (req, res) => {
     const filename = req.query.filename as string;
     const width = req.query.width as string;
     const height = req.query.height as string;
@@ -19,12 +30,12 @@ image.get('/', async (req, res) => {
     try {
         // check if query is sufficient
         if (!filename || !width || !height) {
-            throw new Error("invalid query string");
+            throw new Error('invalid query string');
         }
 
         // check if requested filename is available
         if (!(await isFilenameOnServer(filename))) {
-            throw new Error("no equivalent filename on server!");
+            throw new Error('no equivalent filename on server!');
         }
 
         // check if "thumbs" output directory exists
@@ -34,22 +45,28 @@ image.get('/', async (req, res) => {
         await fs.access(`${outputDir}/${filename}${width}x${height}.jpg`);
 
         // then send the file which is already there
-        res.sendFile(Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`));
-        
-        console.log("sent already processed image");
+        res.sendFile(
+            Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`)
+        );
+
+        console.log('sent already processed image');
         return;
         // end route here
-
     } catch (error) {
         // found no corresponding file on server or invalid query string
-        if (error.message == "invalid query string" || error.message == "no equivalent filename on server!") {
-
+        if (
+            error.message == 'invalid query string' ||
+            error.message == 'no equivalent filename on server!'
+        ) {
             console.log(error.message);
             return res.status(400).end(error.message);
 
-        // found no corresponding output folder, creates one
-        } else if (error.code == "ENOENT" && error.syscall == "access" && error.path == outputDir) {
-
+            // found no corresponding output folder, creates one
+        } else if (
+            error.code == 'ENOENT' &&
+            error.syscall == 'access' &&
+            error.path == outputDir
+        ) {
             console.log("no output folder, let's create one ...");
 
             try {
@@ -58,8 +75,12 @@ image.get('/', async (req, res) => {
                 console.log(error);
             }
 
-        // found output folder but there is not an already process file
-        } else if (error.code == "ENOENT" && error.syscall == "access" && error.path == `${outputDir}/${filename}${width}x${height}.jpg`) {
+            // found output folder but there is not an already process file
+        } else if (
+            error.code == 'ENOENT' &&
+            error.syscall == 'access' &&
+            error.path == `${outputDir}/${filename}${width}x${height}.jpg`
+        ) {
             console.log("directory exists, but file doesn't");
         } else {
             console.log(error);
@@ -70,34 +91,18 @@ image.get('/', async (req, res) => {
     try {
         const path = Path.resolve(`${inputDir}/${filename}.jpg`);
 
-        console.log("creating image");
+        console.log('creating image');
 
         await sharp(path)
-            .resize(
-                parseInt(width),
-                parseInt(height)
-            )
+            .resize(parseInt(width), parseInt(height))
             .toFile(`${outputDir}/${filename}${width}x${height}.jpg`);
 
-        res.sendFile(Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`));
-
+        res.sendFile(
+            Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`)
+        );
     } catch (error) {
         console.log(error);
     }
-
 });
 
-async function isFilenameOnServer(filename: string) {
-    const files = await fs.readdir(inputDir);
-    const fileNames = files.map(file => file.split(".")[0]);
-
-    const found = fileNames.find(name => name == filename);
-    
-    if (found) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-export default image;
+export default images;
