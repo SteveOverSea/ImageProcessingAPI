@@ -4,76 +4,100 @@ import sharp from 'sharp';
 import { promises as fs} from "fs";
 
 const image = express.Router();
+const inputDir = "images";
+const outputDir = "thumbs";
+
+// TODO: add image size to name and check
+// template for images name: [filename][width]x[height].jpg
 
 image.get('/', async (req, res) => {
 
-    let sentFile = false;
+    const filename = req.query.filename as string;
+    const width = req.query.width as string;
+    const height = req.query.height as string;
 
     try {
+        // check if query is sufficient
+        if (!filename || !width || !height) {
+            throw new Error("invalid query string");
+        }
+
         // check if requested filename is available
-        const files = await fs.readdir("images");
-        const fileNames = files.map(file => file.split(".")[0]);
-
-        const found = fileNames.find(name => name == req.query.filename);
-
-        if (!found) {
+        if (!(await isFilenameOnServer(filename))) {
             throw new Error("no equivalent filename on server!");
         }
 
-        //check if "thumbs" output directory exists
-        await fs.access("thumb");
+        // check if "thumbs" output directory exists
+        await fs.access(outputDir);
 
-        //check if thumb image already exists
-        await fs.access(`thumb/${req.query.filename}.jpg`);
-        res.sendFile(Path.resolve(`thumb/${req.query.filename}.jpg`));
-        // end route here
+        // check if thumb image already exists
+        await fs.access(`${outputDir}/${filename}${width}x${height}.jpg`);
+
+        // then send the file which is already there
+        res.sendFile(Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`));
+        
         console.log("sent already processed image");
-        sentFile = true;
+        return;
+        // end route here
 
     } catch (error) {
-        if (error.message == "no equivalent filename on server!") {
+        // found no corresponding file on server or invalid query string
+        if (error.message == "invalid query string" || error.message == "no equivalent filename on server!") {
 
             console.log(error.message);
-            res.end(error.message);
+            return res.status(400).end(error.message);
 
-        } else if (error.code == "ENOENT" && error.syscall == "access" && error.path == "thumb") {
+        // found no corresponding output folder, creates one
+        } else if (error.code == "ENOENT" && error.syscall == "access" && error.path == outputDir) {
 
             console.log("no output folder, let's create one ...");
 
             try {
-                await fs.mkdir("thumb");
+                await fs.mkdir(outputDir);
             } catch (error) {
                 console.log(error);
             }
 
-        } else if (error.code == "ENOENT" && error.syscall == "access" && error.path == `thumb/${req.query.filename}.jpg`) {
+        // found output folder but there is not an already process file
+        } else if (error.code == "ENOENT" && error.syscall == "access" && error.path == `${outputDir}/${filename}${width}x${height}.jpg`) {
             console.log("directory exists, but file doesn't");
         } else {
             console.log(error);
         }
     }
 
-    // only run sharp when there is no image
-    if (!sentFile) {
-        try {
-            const path = Path.resolve(`images/${req.query.filename}.jpg`);
-    
-            console.log("creating image");
+    // only run sharp when there is not an processed image already sent
+    try {
+        const path = Path.resolve(`${inputDir}/${filename}.jpg`);
 
-            await sharp(path)
-                .resize(
-                    parseInt(req.query.width as string),
-                    parseInt(req.query.height as string)
-                )
-                .toFile(`thumb/${req.query.filename}.jpg`);
-    
-            res.sendFile(Path.resolve(`thumb/${req.query.filename}.jpg`));
-    
-        } catch (error) {
-            console.log(error);
-        }
+        console.log("creating image");
+
+        await sharp(path)
+            .resize(
+                parseInt(width),
+                parseInt(height)
+            )
+            .toFile(`${outputDir}/${filename}${width}x${height}.jpg`);
+
+        res.sendFile(Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`));
+
+    } catch (error) {
+        console.log(error);
     }
 
 });
+
+async function isFilenameOnServer(filename: string) {
+    const files = await fs.readdir(inputDir);
+    const fileNames = files.map(file => file.split(".")[0]);
+
+    const found = fileNames.find(name => name == filename);
+    
+    if (found) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 export default image;
