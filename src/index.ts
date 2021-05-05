@@ -9,3 +9,5 @@ app.use('/api', routes);
 app.use('/api/image', image);
 
 app.listen(port, () => console.log(`Listening on ${port}`));
+
+export default app;

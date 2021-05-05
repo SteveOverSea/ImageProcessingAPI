@@ -11,3 +11,4 @@ var port = 3000;
 app.use('/api', index_1.default);
 app.use('/api/image', image_1.default);
 app.listen(port, function () { return console.log("Listening on " + port); });
+exports.default = app;

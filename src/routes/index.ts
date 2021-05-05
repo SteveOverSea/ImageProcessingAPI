@@ -2,7 +2,7 @@ import express from 'express';
 const routes = express.Router();
 
 routes.get('/', (req, res) => {
-    res.send('hello from routes');
+    res.send('make a query on /api/image/filename=...&width=...&height=..');
 });
 
 export default routes;
