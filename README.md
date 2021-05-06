@@ -27,6 +27,13 @@ npm run start-build
 
 Go to localhost:3000 to see  the index.html file, where you can upload an image or send an API request via the HTML form
 
+Run the test-suite with
+
+```
+npm run test
+```
+
+
 ## API Request
 
 The query uses following template
