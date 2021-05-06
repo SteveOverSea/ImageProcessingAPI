@@ -50,7 +50,6 @@ describe('testing endpoints', function () {
                 case 0: return [4 /*yield*/, request.get('/api/image?filename=fjord&width=200&height=200')];
                 case 1:
                     response = _a.sent();
-                    console.log(response);
                     expect(response.status).toBe(200);
                     done();
                     return [2 /*return*/];

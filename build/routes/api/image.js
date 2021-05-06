@@ -43,16 +43,34 @@ var express_1 = __importDefault(require("express"));
 var path_1 = __importDefault(require("path"));
 var sharp_1 = __importDefault(require("sharp"));
 var fs_1 = require("fs");
+var express_fileupload_1 = __importDefault(require("express-fileupload"));
 var image = express_1.default.Router();
 var inputDir = 'images';
 var outputDir = 'thumbs';
-// template for images name: [filename][width]x[height].jpg
+// template for images name: [filename][width]x[height].jpg or .png
+image.post('/', express_fileupload_1.default(), function (req, res) {
+    if (req.files && req.files.upload) {
+        var uploadedFile = req.files.upload;
+        uploadedFile.mv("./images/" + uploadedFile.name, function (err) {
+            if (err)
+                console.log(err);
+        });
+        console.log('uploaded file');
+        res.redirect(200, '/');
+    }
+    else {
+        console.log('no file');
+        res.redirect(400, '/');
+    }
+});
 function isFilenameOnServer(filename) {
     return __awaiter(this, void 0, void 0, function () {
-        var files, fileNames, found;
+        var files, fileNames, found, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, fs_1.promises.readdir(inputDir)];
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fs_1.promises.readdir(inputDir)];
                 case 1:
                     files = _a.sent();
                     fileNames = files.map(function (file) { return file.split('.')[0]; });
@@ -63,13 +81,39 @@ function isFilenameOnServer(filename) {
                     else {
                         return [2 /*return*/, false];
                     }
-                    return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_1 = _a.sent();
+                    console.log(error_1);
+                    return [2 /*return*/, false];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+function getFileExtension(filename) {
+    return __awaiter(this, void 0, void 0, function () {
+        var files, reqfile, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, fs_1.promises.readdir(inputDir)];
+                case 1:
+                    files = _a.sent();
+                    reqfile = files.find(function (file) { return file.split('.')[0] == filename; });
+                    return [2 /*return*/, reqfile === null || reqfile === void 0 ? void 0 : reqfile.split('.')[1]];
+                case 2:
+                    error_2 = _a.sent();
+                    console.log(error_2);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
 image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var filename, width, height, error_1, error_2, path, error_3;
+    var filename, width, height, fileExtension, error_3, error_4, path, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -78,7 +122,7 @@ image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                 height = req.query.height;
                 _a.label = 1;
             case 1:
-                _a.trys.push([1, 5, , 13]);
+                _a.trys.push([1, 6, , 14]);
                 // check if query is sufficient
                 if (!filename || !width || !height) {
                     throw new Error('invalid query string');
@@ -89,70 +133,76 @@ image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                 if (!(_a.sent())) {
                     throw new Error('no equivalent filename on server!');
                 }
+                return [4 /*yield*/, getFileExtension(filename)];
+            case 3:
+                // get file extension
+                fileExtension = _a.sent();
+                console.log(fileExtension);
                 // check if "thumbs" output directory exists
                 return [4 /*yield*/, fs_1.promises.access(outputDir)];
-            case 3:
+            case 4:
                 // check if "thumbs" output directory exists
                 _a.sent();
                 // check if thumb image already exists
-                return [4 /*yield*/, fs_1.promises.access(outputDir + "/" + filename + width + "x" + height + ".jpg")];
-            case 4:
+                return [4 /*yield*/, fs_1.promises.access(outputDir + "/" + filename + width + "x" + height + "." + fileExtension)];
+            case 5:
                 // check if thumb image already exists
                 _a.sent();
                 // then send the file which is already there
-                res.sendFile(path_1.default.resolve(outputDir + "/" + filename + width + "x" + height + ".jpg"));
+                res.sendFile(path_1.default.resolve(outputDir + "/" + filename + width + "x" + height + "." + fileExtension));
                 console.log('sent already processed image');
                 return [2 /*return*/];
-            case 5:
-                error_1 = _a.sent();
-                if (!(error_1.message == 'invalid query string' ||
-                    error_1.message == 'no equivalent filename on server!')) return [3 /*break*/, 6];
-                console.log(error_1.message);
-                return [2 /*return*/, res.status(400).end(error_1.message)];
             case 6:
-                if (!(error_1.code == 'ENOENT' &&
-                    error_1.syscall == 'access' &&
-                    error_1.path == outputDir)) return [3 /*break*/, 11];
-                console.log("no output folder, let's create one ...");
-                _a.label = 7;
+                error_3 = _a.sent();
+                if (!(error_3.message == 'invalid query string' ||
+                    error_3.message == 'no equivalent filename on server!')) return [3 /*break*/, 7];
+                console.log(error_3.message);
+                return [2 /*return*/, res.status(400).end(error_3.message)];
             case 7:
-                _a.trys.push([7, 9, , 10]);
-                return [4 /*yield*/, fs_1.promises.mkdir(outputDir)];
+                if (!(error_3.code == 'ENOENT' &&
+                    error_3.syscall == 'access' &&
+                    error_3.path == outputDir)) return [3 /*break*/, 12];
+                console.log("no output folder, let's create one ...");
+                _a.label = 8;
             case 8:
-                _a.sent();
-                return [3 /*break*/, 10];
+                _a.trys.push([8, 10, , 11]);
+                return [4 /*yield*/, fs_1.promises.mkdir(outputDir)];
             case 9:
-                error_2 = _a.sent();
-                console.log(error_2);
-                return [3 /*break*/, 10];
-            case 10: return [3 /*break*/, 12];
-            case 11:
-                if (error_1.code == 'ENOENT' &&
-                    error_1.syscall == 'access' &&
-                    error_1.path == outputDir + "/" + filename + width + "x" + height + ".jpg") {
+                _a.sent();
+                return [3 /*break*/, 11];
+            case 10:
+                error_4 = _a.sent();
+                console.log(error_4);
+                return [3 /*break*/, 11];
+            case 11: return [3 /*break*/, 13];
+            case 12:
+                if (error_3.code == 'ENOENT' &&
+                    error_3.syscall == 'access' &&
+                    error_3.path ==
+                        outputDir + "/" + filename + width + "x" + height + "." + fileExtension) {
                     console.log("directory exists, but file doesn't");
                 }
                 else {
-                    console.log(error_1);
+                    console.log(error_3);
                 }
-                _a.label = 12;
-            case 12: return [3 /*break*/, 13];
-            case 13:
-                _a.trys.push([13, 15, , 16]);
-                path = path_1.default.resolve(inputDir + "/" + filename + ".jpg");
+                _a.label = 13;
+            case 13: return [3 /*break*/, 14];
+            case 14:
+                _a.trys.push([14, 16, , 17]);
+                path = path_1.default.resolve(inputDir + "/" + filename + "." + fileExtension);
                 console.log('creating image');
                 return [4 /*yield*/, sharp_1.default(path)
                         .resize(parseInt(width), parseInt(height))
-                        .toFile(outputDir + "/" + filename + width + "x" + height + ".jpg")];
-            case 14:
-                _a.sent();
-                res.sendFile(path_1.default.resolve(outputDir + "/" + filename + width + "x" + height + ".jpg"));
-                return [3 /*break*/, 16];
+                        .toFile(outputDir + "/" + filename + width + "x" + height + "." + fileExtension)];
             case 15:
-                error_3 = _a.sent();
-                console.log(error_3);
-                return [3 /*break*/, 16];
-            case 16: return [2 /*return*/];
+                _a.sent();
+                res.sendFile(path_1.default.resolve(outputDir + "/" + filename + width + "x" + height + "." + fileExtension));
+                return [3 /*break*/, 17];
+            case 16:
+                error_5 = _a.sent();
+                console.log(error_5);
+                return [3 /*break*/, 17];
+            case 17: return [2 /*return*/];
         }
     });
 }); });

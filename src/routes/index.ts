@@ -1,9 +1,9 @@
-import Path from "path";
+import Path from 'path';
 import express from 'express';
 const routes = express.Router();
 
 routes.get('/', (req, res) => {
-    res.sendFile(Path.join(__dirname, "index.html"));
+    res.sendFile(Path.resolve('views', 'index.html'));
 });
 
 export default routes;

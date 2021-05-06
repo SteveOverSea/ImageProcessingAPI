@@ -2,7 +2,7 @@ import express from 'express';
 import Path from 'path';
 import sharp from 'sharp';
 import { promises as fs } from 'fs';
-import fileUpload, { UploadedFile } from "express-fileupload";
+import fileUpload, { UploadedFile } from 'express-fileupload';
 
 const image = express.Router();
 const inputDir = 'images';
@@ -10,16 +10,17 @@ const outputDir = 'thumbs';
 
 // template for images name: [filename][width]x[height].jpg or .png
 
-image.post("/", fileUpload(), (req, res) => {
-    if(req.files && req.files.upload) {
-        let uploadedFile = req.files.upload as UploadedFile;
+image.post('/', fileUpload(), (req, res) => {
+    if (req.files && req.files.upload) {
+        const uploadedFile = req.files.upload as UploadedFile;
         uploadedFile.mv(`./images/${uploadedFile.name}`, (err) => {
-            if(err) console.log(err);
+            if (err) console.log(err);
         });
-        res.send("file upload succesful");
+        console.log('uploaded file');
+        res.redirect(200, '/');
     } else {
-        console.log("no file");
-        res.send("file not uploaded");
+        console.log('no file');
+        res.redirect(400, '/');
     }
 });
 
@@ -27,9 +28,9 @@ async function isFilenameOnServer(filename: string) {
     try {
         const files = await fs.readdir(inputDir);
         const fileNames = files.map((file) => file.split('.')[0]);
-    
+
         const found = fileNames.find((name) => name == filename);
-    
+
         if (found) {
             return true;
         } else {
@@ -44,8 +45,8 @@ async function isFilenameOnServer(filename: string) {
 async function getFileExtension(filename: string) {
     try {
         const files = await fs.readdir(inputDir);
-        const reqfile = files.find(file => file.split(".")[0] == filename);
-        return reqfile?.split(".")[1];
+        const reqfile = files.find((file) => file.split('.')[0] == filename);
+        return reqfile?.split('.')[1];
     } catch (error) {
         console.log(error);
     }
@@ -76,11 +77,15 @@ image.get('/', async (req, res) => {
         await fs.access(outputDir);
 
         // check if thumb image already exists
-        await fs.access(`${outputDir}/${filename}${width}x${height}.${fileExtension}`);
+        await fs.access(
+            `${outputDir}/${filename}${width}x${height}.${fileExtension}`
+        );
 
         // then send the file which is already there
         res.sendFile(
-            Path.resolve(`${outputDir}/${filename}${width}x${height}.${fileExtension}`)
+            Path.resolve(
+                `${outputDir}/${filename}${width}x${height}.${fileExtension}`
+            )
         );
 
         console.log('sent already processed image');
@@ -113,7 +118,8 @@ image.get('/', async (req, res) => {
         } else if (
             error.code == 'ENOENT' &&
             error.syscall == 'access' &&
-            error.path == `${outputDir}/${filename}${width}x${height}.${fileExtension}`
+            error.path ==
+                `${outputDir}/${filename}${width}x${height}.${fileExtension}`
         ) {
             console.log("directory exists, but file doesn't");
         } else {
@@ -129,10 +135,14 @@ image.get('/', async (req, res) => {
 
         await sharp(path)
             .resize(parseInt(width), parseInt(height))
-            .toFile(`${outputDir}/${filename}${width}x${height}.${fileExtension}`);
+            .toFile(
+                `${outputDir}/${filename}${width}x${height}.${fileExtension}`
+            );
 
         res.sendFile(
-            Path.resolve(`${outputDir}/${filename}${width}x${height}.${fileExtension}`)
+            Path.resolve(
+                `${outputDir}/${filename}${width}x${height}.${fileExtension}`
+            )
         );
     } catch (error) {
         console.log(error);
