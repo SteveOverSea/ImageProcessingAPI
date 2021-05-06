@@ -5,7 +5,7 @@ import image from './routes/api/image';
 const app = express();
 const port = 3000;
 
-app.use('/api', routes);
+app.use('/', routes);
 app.use('/api/image', image);
 
 app.listen(port, () => console.log(`Listening on ${port}`));

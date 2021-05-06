@@ -7,9 +7,17 @@
     <title>Image Processing API</title>
 </head>
 <body>
-    <h1>Upload an image to be processed.</h1>
+    <h1>Image Processing API</h1>
+    <h2>Upload an image to be processed later on.</h2>
     <form method="POST" action="/api/image" enctype="multipart/form-data">
         <input name="upload" type="file" accept="image/png, image/jpg">
+        <input type="submit">
+    </form>
+    <h2>Make a request for a resized image</h2>
+    <form method="GET" action="/api/image">
+        <input type="text" placeholder="filename" name="filename">
+        <input type="number" placeholder="width" name="width">
+        <input type="number" placeholder="height" name="height">
         <input type="submit">
     </form>
     
