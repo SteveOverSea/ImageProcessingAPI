@@ -24,7 +24,7 @@ image.post('/', fileUpload(), (req, res) => {
     }
 });
 
-async function isFilenameOnServer(filename: string) {
+export async function isFilenameOnServer(filename: string) {
     try {
         const files = await fs.readdir(inputDir);
         const fileNames = files.map((file) => file.split('.')[0]);
@@ -42,7 +42,7 @@ async function isFilenameOnServer(filename: string) {
     }
 }
 
-async function getFileExtension(filename: string) {
+export async function getFileExtension(filename: string) {
     try {
         const files = await fs.readdir(inputDir);
         const reqfile = files.find((file) => file.split('.')[0] == filename);

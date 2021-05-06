@@ -39,6 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getFileExtension = exports.isFilenameOnServer = void 0;
 var express_1 = __importDefault(require("express"));
 var path_1 = __importDefault(require("path"));
 var sharp_1 = __importDefault(require("sharp"));
@@ -91,6 +92,7 @@ function isFilenameOnServer(filename) {
         });
     });
 }
+exports.isFilenameOnServer = isFilenameOnServer;
 function getFileExtension(filename) {
     return __awaiter(this, void 0, void 0, function () {
         var files, reqfile, error_2;
@@ -112,6 +114,7 @@ function getFileExtension(filename) {
         });
     });
 }
+exports.getFileExtension = getFileExtension;
 image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var filename, width, height, fileExtension, error_3, error_4, path, error_5;
     return __generator(this, function (_a) {
