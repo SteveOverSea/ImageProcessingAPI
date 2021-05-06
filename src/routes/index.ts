@@ -1,8 +1,9 @@
+import Path from "path";
 import express from 'express';
 const routes = express.Router();
 
 routes.get('/', (req, res) => {
-    res.send('make a query on /api/image/filename=...&width=...&height=..');
+    res.sendFile(Path.join(__dirname, "index.html"));
 });
 
 export default routes;

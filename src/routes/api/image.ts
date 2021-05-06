@@ -2,6 +2,7 @@ import express from 'express';
 import Path from 'path';
 import sharp from 'sharp';
 import { promises as fs } from 'fs';
+import fileUpload, { UploadedFile } from "express-fileupload";
 
 const image = express.Router();
 const inputDir = 'images';
@@ -21,6 +22,19 @@ async function isFilenameOnServer(filename: string) {
         return false;
     }
 }
+
+image.post("/", fileUpload(), (req, res) => {
+    if(req.files && req.files.upload) {
+        let uploadedFile = req.files.upload as UploadedFile;
+        uploadedFile.mv(`./images/${uploadedFile.name}`, (err) => {
+            if(err) console.log(err);
+        });
+        res.send("file upload succesful");
+    } else {
+        console.log("no file");
+        res.send("file not uploaded");
+    }
+});
 
 image.get('/', async (req, res) => {
     const filename = req.query.filename as string;
