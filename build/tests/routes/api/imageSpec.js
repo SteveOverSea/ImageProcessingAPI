@@ -56,7 +56,7 @@ describe('testing api/image endpoints', function () {
             }
         });
     }); });
-    it("returns 400 bad request if invalid filename", function () { return __awaiter(void 0, void 0, void 0, function () {
+    it('returns 400 bad request if invalid filename', function () { return __awaiter(void 0, void 0, void 0, function () {
         var response;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -68,7 +68,7 @@ describe('testing api/image endpoints', function () {
             }
         });
     }); });
-    it("returns 400 bad request if missing height", function () { return __awaiter(void 0, void 0, void 0, function () {
+    it('returns 400 bad request if missing height', function () { return __awaiter(void 0, void 0, void 0, function () {
         var response;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -81,42 +81,42 @@ describe('testing api/image endpoints', function () {
         });
     }); });
 });
-describe("testing image processing", function () {
-    it("should find fjord.jpg on server", function () { return __awaiter(void 0, void 0, void 0, function () {
+describe('testing image processing', function () {
+    it('should find fjord.jpg on server', function () { return __awaiter(void 0, void 0, void 0, function () {
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = expect;
-                    return [4 /*yield*/, image_1.isFilenameOnServer("fjord")];
+                    return [4 /*yield*/, image_1.isFilenameOnServer('fjord')];
                 case 1:
                     _a.apply(void 0, [_b.sent()]).toBe(true);
                     return [2 /*return*/];
             }
         });
     }); });
-    it("should not find misspelled fjoooord on server", function () { return __awaiter(void 0, void 0, void 0, function () {
+    it('should not find misspelled fjoooord on server', function () { return __awaiter(void 0, void 0, void 0, function () {
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = expect;
-                    return [4 /*yield*/, image_1.isFilenameOnServer("fjoooord")];
+                    return [4 /*yield*/, image_1.isFilenameOnServer('fjoooord')];
                 case 1:
                     _a.apply(void 0, [_b.sent()]).toBe(false);
                     return [2 /*return*/];
             }
         });
     }); });
-    it("should get jpg file extension from fjord", function () { return __awaiter(void 0, void 0, void 0, function () {
+    it('should get jpg file extension from fjord', function () { return __awaiter(void 0, void 0, void 0, function () {
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _a = expect;
-                    return [4 /*yield*/, image_1.getFileExtension("fjord")];
+                    return [4 /*yield*/, image_1.getFileExtension('fjord')];
                 case 1:
-                    _a.apply(void 0, [_b.sent()]).toEqual("jpg");
+                    _a.apply(void 0, [_b.sent()]).toEqual('jpg');
                     return [2 /*return*/];
             }
         });

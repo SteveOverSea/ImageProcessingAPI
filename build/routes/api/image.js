@@ -48,7 +48,6 @@ var express_fileupload_1 = __importDefault(require("express-fileupload"));
 var image = express_1.default.Router();
 var inputDir = 'images';
 var outputDir = 'thumbs';
-// template for images name: [filename][width]x[height].jpg or .png
 image.post('/', express_fileupload_1.default(), function (req, res) {
     if (req.files && req.files.upload) {
         var uploadedFile = req.files.upload;
@@ -60,10 +59,11 @@ image.post('/', express_fileupload_1.default(), function (req, res) {
         res.redirect(200, '/');
     }
     else {
-        console.log('no file');
+        console.log('error while uplading file');
         res.redirect(400, '/');
     }
 });
+// returns true if filename is in input directory
 function isFilenameOnServer(filename) {
     return __awaiter(this, void 0, void 0, function () {
         var files, fileNames, found, error_1;
@@ -93,6 +93,7 @@ function isFilenameOnServer(filename) {
     });
 }
 exports.isFilenameOnServer = isFilenameOnServer;
+// returns file extentions for given filename in input directory
 function getFileExtension(filename) {
     return __awaiter(this, void 0, void 0, function () {
         var files, reqfile, error_2;
@@ -153,7 +154,8 @@ image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                 _a.sent();
                 // then send the file which is already there
                 res.sendFile(path_1.default.resolve(outputDir + "/" + filename + width + "x" + height + "." + fileExtension));
-                console.log('sent already processed image');
+                console.log('returned already processed image');
+                // end route here
                 return [2 /*return*/];
             case 6:
                 error_3 = _a.sent();
@@ -165,7 +167,7 @@ image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, fu
                 if (!(error_3.code == 'ENOENT' &&
                     error_3.syscall == 'access' &&
                     error_3.path == outputDir)) return [3 /*break*/, 12];
-                console.log("no output folder, let's create one ...");
+                console.log('no output folder, creating one');
                 _a.label = 8;
             case 8:
                 _a.trys.push([8, 10, , 11]);
@@ -193,7 +195,7 @@ image.get('/', function (req, res) { return __awaiter(void 0, void 0, void 0, fu
             case 14:
                 _a.trys.push([14, 16, , 17]);
                 path = path_1.default.resolve(inputDir + "/" + filename + "." + fileExtension);
-                console.log('creating image');
+                console.log('processing image');
                 return [4 /*yield*/, sharp_1.default(path)
                         .resize(parseInt(width), parseInt(height))
                         .toFile(outputDir + "/" + filename + width + "x" + height + "." + fileExtension)];
