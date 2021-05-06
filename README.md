@@ -7,7 +7,7 @@ Technologies:
 * TypeScript
 * Express
 * Express-FileUpload (File-Upload Middleware)
-* ESLinz & Prettier
+* ESLint & Prettier
 * Jasmine & Supertest
 * Sharp (Image Processing)
 
@@ -38,10 +38,12 @@ npm run test
 
 The query uses following template
 
+```
 localhost:3000/api/image?
     filename={requested_filename}
     &width={requested_width}
     &height={requested_height}
+```
 
 ## Processed Images
 
