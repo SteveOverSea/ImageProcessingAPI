@@ -8,20 +8,7 @@ const image = express.Router();
 const inputDir = 'images';
 const outputDir = 'thumbs';
 
-// template for images name: [filename][width]x[height].jpg
-
-async function isFilenameOnServer(filename: string) {
-    const files = await fs.readdir(inputDir);
-    const fileNames = files.map((file) => file.split('.')[0]);
-
-    const found = fileNames.find((name) => name == filename);
-
-    if (found) {
-        return true;
-    } else {
-        return false;
-    }
-}
+// template for images name: [filename][width]x[height].jpg or .png
 
 image.post("/", fileUpload(), (req, res) => {
     if(req.files && req.files.upload) {
@@ -36,10 +23,39 @@ image.post("/", fileUpload(), (req, res) => {
     }
 });
 
+async function isFilenameOnServer(filename: string) {
+    try {
+        const files = await fs.readdir(inputDir);
+        const fileNames = files.map((file) => file.split('.')[0]);
+    
+        const found = fileNames.find((name) => name == filename);
+    
+        if (found) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+async function getFileExtension(filename: string) {
+    try {
+        const files = await fs.readdir(inputDir);
+        const reqfile = files.find(file => file.split(".")[0] == filename);
+        return reqfile?.split(".")[1];
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 image.get('/', async (req, res) => {
     const filename = req.query.filename as string;
     const width = req.query.width as string;
     const height = req.query.height as string;
+    let fileExtension;
 
     try {
         // check if query is sufficient
@@ -52,15 +68,19 @@ image.get('/', async (req, res) => {
             throw new Error('no equivalent filename on server!');
         }
 
+        // get file extension
+        fileExtension = await getFileExtension(filename);
+        console.log(fileExtension);
+
         // check if "thumbs" output directory exists
         await fs.access(outputDir);
 
         // check if thumb image already exists
-        await fs.access(`${outputDir}/${filename}${width}x${height}.jpg`);
+        await fs.access(`${outputDir}/${filename}${width}x${height}.${fileExtension}`);
 
         // then send the file which is already there
         res.sendFile(
-            Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`)
+            Path.resolve(`${outputDir}/${filename}${width}x${height}.${fileExtension}`)
         );
 
         console.log('sent already processed image');
@@ -93,7 +113,7 @@ image.get('/', async (req, res) => {
         } else if (
             error.code == 'ENOENT' &&
             error.syscall == 'access' &&
-            error.path == `${outputDir}/${filename}${width}x${height}.jpg`
+            error.path == `${outputDir}/${filename}${width}x${height}.${fileExtension}`
         ) {
             console.log("directory exists, but file doesn't");
         } else {
@@ -103,16 +123,16 @@ image.get('/', async (req, res) => {
 
     // only run sharp when there is not an processed image already sent
     try {
-        const path = Path.resolve(`${inputDir}/${filename}.jpg`);
+        const path = Path.resolve(`${inputDir}/${filename}.${fileExtension}`);
 
         console.log('creating image');
 
         await sharp(path)
             .resize(parseInt(width), parseInt(height))
-            .toFile(`${outputDir}/${filename}${width}x${height}.jpg`);
+            .toFile(`${outputDir}/${filename}${width}x${height}.${fileExtension}`);
 
         res.sendFile(
-            Path.resolve(`${outputDir}/${filename}${width}x${height}.jpg`)
+            Path.resolve(`${outputDir}/${filename}${width}x${height}.${fileExtension}`)
         );
     } catch (error) {
         console.log(error);
