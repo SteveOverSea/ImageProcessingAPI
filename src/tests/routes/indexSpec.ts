@@ -5,9 +5,7 @@ const request = supertest(app);
 
 describe('testing / endpoint', () => {
     it('gets the / endpoint', async () => {
-        const response = await request.get(
-            '/'
-        );
+        const response = await request.get('/');
         expect(response.status).toBe(200);
     });
 });

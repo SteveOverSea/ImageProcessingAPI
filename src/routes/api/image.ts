@@ -8,22 +8,21 @@ const image = express.Router();
 const inputDir = 'images';
 const outputDir = 'thumbs';
 
-// template for images name: [filename][width]x[height].jpg or .png
-
 image.post('/', fileUpload(), (req, res) => {
     if (req.files && req.files.upload) {
         const uploadedFile = req.files.upload as UploadedFile;
         uploadedFile.mv(`./images/${uploadedFile.name}`, (err) => {
             if (err) console.log(err);
         });
-        console.log('uploaded file');
+        console.log("uploaded file");
         res.redirect(200, '/');
     } else {
-        console.log('no file');
+        console.log("error while uplading file");
         res.redirect(400, '/');
     }
 });
 
+// returns true if filename is in input directory
 export async function isFilenameOnServer(filename: string) {
     try {
         const files = await fs.readdir(inputDir);
@@ -42,6 +41,7 @@ export async function isFilenameOnServer(filename: string) {
     }
 }
 
+// returns file extentions for given filename in input directory
 export async function getFileExtension(filename: string) {
     try {
         const files = await fs.readdir(inputDir);
@@ -87,10 +87,11 @@ image.get('/', async (req, res) => {
                 `${outputDir}/${filename}${width}x${height}.${fileExtension}`
             )
         );
-
-        console.log('sent already processed image');
-        return;
+            
+        console.log("returned already processed image");
         // end route here
+        return;
+
     } catch (error) {
         // found no corresponding file on server or invalid query string
         if (
@@ -100,13 +101,13 @@ image.get('/', async (req, res) => {
             console.log(error.message);
             return res.status(400).end(error.message);
 
-            // found no corresponding output folder, creates one
+        // found no corresponding output folder, creates one
         } else if (
             error.code == 'ENOENT' &&
             error.syscall == 'access' &&
             error.path == outputDir
         ) {
-            console.log("no output folder, let's create one ...");
+            console.log("no output folder, creating one");
 
             try {
                 await fs.mkdir(outputDir);
@@ -114,7 +115,7 @@ image.get('/', async (req, res) => {
                 console.log(error);
             }
 
-            // found output folder but there is not an already process file
+        // found output folder but there is not an already process file
         } else if (
             error.code == 'ENOENT' &&
             error.syscall == 'access' &&
@@ -131,7 +132,7 @@ image.get('/', async (req, res) => {
     try {
         const path = Path.resolve(`${inputDir}/${filename}.${fileExtension}`);
 
-        console.log('creating image');
+        console.log('processing image');
 
         await sharp(path)
             .resize(parseInt(width), parseInt(height))
